@@ -23,15 +23,14 @@ struct FileObject{
     std::filesystem::path path;
     std::string directory_name;
     Date date_of_change;
-    std::string type;
 
     FileObject(std::filesystem::path _path);
 
     void showPath();
 
-    void openTxtFile(std::string name);
+    void openFile(std::string name);
 
-    void createTxtFile(std::string name);
+    void createFile(std::string name);
 
     void deleteFile(std::string name);
 

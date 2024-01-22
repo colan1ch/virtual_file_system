@@ -22,8 +22,7 @@ std::ostream& operator << (std::ostream &out, Date &date) {
 FileObject::FileObject(std::filesystem::path _path) :
     path(_path),
     directory_name(_path.filename()),
-    date_of_change(timeToString(std::filesystem::last_write_time(_path))),
-    type(".exe")
+    date_of_change(timeToString(std::filesystem::last_write_time(_path)))
 {}
 
 
@@ -31,7 +30,7 @@ void FileObject::showPath(){
     std::cout << path << '\n';
 }
 
-void FileObject::openTxtFile(std::string name){
+void FileObject::openFile(std::string name){
     std::ifstream fin(path.string() + "/" + name);
     if (!fin) {
         std::cout << "No such file in this directory\n";
@@ -44,7 +43,7 @@ void FileObject::openTxtFile(std::string name){
     std::cout << std::endl;
 }
 
-void FileObject::createTxtFile(std::string name) {
+void FileObject::createFile(std::string name) {
     std::ofstream fout(path.string() + "/" + name);
     char chr;
     std::cin.get(chr);
@@ -151,11 +150,11 @@ void programLaunch() {
         }
         else if (cmd == "open") {
             std::cin >> filename;
-            cur_file.openTxtFile(filename);
+            cur_file.openFile(filename);
         }
         else if (cmd == "create") {
             std::cin >> filename;
-            cur_file.createTxtFile(filename);
+            cur_file.createFile(filename);
         }
         else if (cmd == "delete") {
             std::cin >> filename;
@@ -179,11 +178,11 @@ void programLaunch() {
         else if (cmd == "files") {
             cur_file.showFiles();
         }
-        else if (cmd == "end") {
-            run = false;
-        }
         else if (cmd == "help") {
             help();
+        }
+        else if (cmd == "end") {
+            run = false;
         }
         else {
             std::cout << "Not such command\n";
