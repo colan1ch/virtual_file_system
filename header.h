@@ -1,24 +1,27 @@
 #pragma once
 #include <iostream>
 #include <fstream>
-#include <vector>
+#include <iomanip>
 #include <filesystem>
+#include <chrono>
+
 
 struct Date{
+    int seconds;
+    int minutes;
+    int hours;
     int day;
-    int month;
+    std::string month;
     int year;
-    Date(int _day, int _month, int _year);
-    //Date(std::string _date);
+
+    Date(std::string _date);
 };
 
 std::ostream& operator << (std::ostream &out, Date &date);
 
-
 struct FileObject{
     std::filesystem::path path;
     std::string directory_name;
-    Date date_of_creation;
     Date date_of_change;
     std::string type;
 
@@ -34,12 +37,13 @@ struct FileObject{
 
     void showSize(std::string name);
 
-    void showDate();
+    void showDirDate();
+
+    void showDate(std::string name);
 
     void changeFileName(std::string old_name, std::string new_name);
 
     void showFiles();
-
 };
 
 void changeDirUp(FileObject &cur_file);
@@ -49,3 +53,5 @@ void changeDir(FileObject &cur_file, std::string name);
 void help();
 
 void programLaunch();
+
+std::string timeToString(std::filesystem::file_time_type ftime);

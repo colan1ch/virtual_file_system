@@ -1,20 +1,20 @@
 #include "header.h"
 
 
-Date::Date(int _day, int _month, int _year) :
-    day(_day),
-    month(_month),
-    year(_year)
-{}
-
-//Date::Date(const std::string _date){
-//    day = stoi(_date.substr(0, 2));
-//    month = stoi(_date.substr(3, 2));
-//    year = stoi(_date.substr(6, 4));
-//}
+Date::Date(const std::string _date){
+    seconds = stoi(_date.substr(17, 2));
+    minutes = stoi(_date.substr(14, 2));
+    hours = stoi(_date.substr(11, 2));
+    day = stoi(_date.substr(8, 2));
+    month = _date.substr(4, 3);
+    year = stoi(_date.substr(20, 4));
+}
 
 std::ostream& operator << (std::ostream &out, Date &date) {
-    out << date.day << '.' << date.month << '.' << date.year;
+    out << std::setfill('0') << std::setw(2) << date.hours << ':' ;
+    out << std::setfill('0') << std::setw(2) << date.minutes << ':';
+    out << std::setfill('0') << std::setw(2) << date.seconds << ", ";
+    out << date.day << ' ' << date.month << ' ' << date.year;
     return out;
 }
 
@@ -22,8 +22,7 @@ std::ostream& operator << (std::ostream &out, Date &date) {
 FileObject::FileObject(std::filesystem::path _path) :
     path(_path),
     directory_name(_path.filename()),
-    date_of_creation(13, 9, 2005),
-    date_of_change(22, 1, 2023),
+    date_of_change(timeToString(std::filesystem::last_write_time(_path))),
     type(".exe")
 {}
 
@@ -61,17 +60,35 @@ void FileObject::deleteFile(std::string name){
     }
 }
 
-void FileObject::showSize(std::string name){
-    std::cout << file_size(std::filesystem::path(path.string() + "/" + name)) << " Bytes\n";
+void FileObject::showSize(std::string name) {
+    std::filesystem::path file_path(path.string() + "/" + name);
+    if (std::filesystem::exists(file_path)) {
+        std::cout << file_size(file_path) << " Bytes\n";
+    }
+    else {
+        std::cout << "No such file in this directory\n";
+    }
 }
 
-void FileObject::showDate(){
-    std::cout << "File was created on " << date_of_creation << '\n';
-    std::cout <<"Last change was on " << date_of_change << '\n';
+void FileObject::showDirDate() {
+    std::cout <<"Last change of directory was in " << date_of_change << '\n';
+}
+
+void FileObject::showDate(std::string name) {
+    std::filesystem::path file_path(path.string() + "/" + name);
+    if (std::filesystem::exists(file_path)) {
+        Date file_date(timeToString(std::filesystem::last_write_time(file_path)));
+        std::cout << "Last change of file was in " << file_date << '\n';
+    }
+    else {
+        std::cout << "No such file in this directory\n";
+    }
 }
 
 void FileObject::changeFileName(std::string old_name, std::string new_name){
-    rename((path.string() + "/" + old_name).c_str(), (path.string() + "/" + new_name).c_str());
+    if (rename((path.string() + "/" + old_name).c_str(), (path.string() + "/" + new_name).c_str())) {
+        std::cout << "No such file in this directory\n";
+    }
 }
 
 void FileObject::showFiles(){
@@ -101,16 +118,17 @@ void changeDir(FileObject &cur_file, std::string name){
 }
 
 void help() {
-    std::cout << "showpath - show current directory path\n";
+    std::cout << "path - show current directory path\n";
     std::cout << "cd <name> - go to directory <name>\n";
     std::cout << "cdup - go to parent directory\n";
-    std::cout << "opentxt <filename> - open txt file <filename>\n";
-    std::cout << "createtxt <filename> - create txt file <filename>\n";
+    std::cout << "open <filename> - open txt file <filename>\n";
+    std::cout << "create <filename> - create txt file <filename>\n";
     std::cout << "delete <filename> - delete file <filename>\n";
-    std::cout << "showsize <filename> - show size of <filename> in bytes\n";
-    std::cout << "showdate <filename> - show dates of creation and changing of <filename>\n";
-    std::cout << "changename <old_name> <new_name> - change name <old_name> to <new_name>\n";
-    std::cout << "showfiles - show all files in current directory\n";
+    std::cout << "size <filename> - show size of <filename> in bytes\n";
+    std::cout << "dirdate - show date of changing a current directory\n";
+    std::cout << "date <filename> - show date of changing <filename>\n";
+    std::cout << "rename <old_name> <new_name> - change name <old_name> to <new_name>\n";
+    std::cout << "files - show all files in current directory\n";
     std::cout << "end - end program\n";
 }
 
@@ -121,7 +139,7 @@ void programLaunch() {
     while (run) {
         std::cout << cur_file.directory_name << ": ";
         std::cin >> cmd;
-        if (cmd == "showpath") {
+        if (cmd == "path") {
             cur_file.showPath();
         }
         else if (cmd == "cd") {
@@ -131,11 +149,11 @@ void programLaunch() {
         else if (cmd == "cdup") {
             changeDirUp(cur_file);
         }
-        else if (cmd == "opentxt") {
+        else if (cmd == "open") {
             std::cin >> filename;
             cur_file.openTxtFile(filename);
         }
-        else if (cmd == "createtxt") {
+        else if (cmd == "create") {
             std::cin >> filename;
             cur_file.createTxtFile(filename);
         }
@@ -143,25 +161,44 @@ void programLaunch() {
             std::cin >> filename;
             cur_file.deleteFile(filename);
         }
-        else if (cmd == "showsize") {
+        else if (cmd == "size") {
             std::cin >> filename;
             cur_file.showSize(filename);
         }
-        else if (cmd == "showdate") {
-            cur_file.showDate();
+        else if (cmd == "dirdate") {
+            cur_file.showDirDate();
         }
-        else if (cmd == "changename") {
+        else if (cmd == "date") {
+            std::cin >> filename;
+            cur_file.showDate(filename);
+        }
+        else if (cmd == "rename") {
             std::cin >> old_name >> filename;
             cur_file.changeFileName(old_name, filename);
         }
-        else if (cmd == "showfiles") {
+        else if (cmd == "files") {
             cur_file.showFiles();
         }
         else if (cmd == "end") {
             run = false;
         }
+        else if (cmd == "help") {
+            help();
+        }
         else {
             std::cout << "Not such command\n";
         }
     }
+}
+
+
+std::string timeToString(std::filesystem::file_time_type ftime) {
+    std::time_t cftime = std::chrono::system_clock::to_time_t(
+            std::chrono::time_point<std::chrono::system_clock>(
+                    std::chrono::seconds(ftime.time_since_epoch() / std::chrono::seconds(1))
+            )
+    );
+    std::string str = std::asctime(std::localtime(&cftime));
+    str.pop_back();
+    return str;
 }
