@@ -9,7 +9,7 @@ struct Date{
     int month;
     int year;
     Date(int _day, int _month, int _year);
-    Date(std::string _date);
+    //Date(std::string _date);
 };
 
 std::ostream& operator << (std::ostream &out, Date &date);
@@ -17,7 +17,7 @@ std::ostream& operator << (std::ostream &out, Date &date);
 
 struct FileObject{
     std::filesystem::path path;
-    std::string file_name;
+    std::string directory_name;
     Date date_of_creation;
     Date date_of_change;
     std::string type;
@@ -45,3 +45,7 @@ struct FileObject{
 void changeDirUp(FileObject &cur_file);
 
 void changeDir(FileObject &cur_file, std::string name);
+
+void help();
+
+void programLaunch();
