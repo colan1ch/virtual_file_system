@@ -1,43 +1,47 @@
 #pragma once
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <filesystem>
 
 struct Date{
-    int date;
+    int day;
     int month;
     int year;
-    Date(int _date, int _month, int _year);
+    Date(int _day, int _month, int _year);
     Date(std::string _date);
 };
 
+std::ostream& operator << (std::ostream &out, Date &date);
+
+
 struct FileObject{
-    std::string path;
+    std::filesystem::path path;
+    std::string file_name;
     Date date_of_creation;
     Date date_of_change;
     std::string type;
 
-    //BaseFileObject(std::string _path, Date _date_of_creation, Date _date_of_change, std::string _type);
+    FileObject(std::filesystem::path _path);
 
     void showPath();
 
-    void changeDir(std::string name);
+    void openTxtFile(std::string name);
 
-    void changeDirUp();
-
-    void openFile(std::string name);
+    void createTxtFile(std::string name);
 
     void deleteFile(std::string name);
 
-    void showSize();
+    void showSize(std::string name);
 
     void showDate();
 
-    void changeFileName(std::string new_name);
+    void changeFileName(std::string old_name, std::string new_name);
 
     void showFiles();
 
 };
 
-std::ostream& operator << (std::ostream& out, FileObject object);
+void changeDirUp(FileObject &cur_file);
 
-
+void changeDir(FileObject &cur_file, std::string name);
