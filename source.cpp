@@ -45,11 +45,11 @@ void FileObject::openFile(std::string name){
 
 void FileObject::createFile(std::string name) {
     std::ofstream fout(path.string() + "/" + name);
-    char chr;
-    std::cin.get(chr);
-    while (chr != '`') {
+    std::cout << name << " //Use 'esc' to finish\n";
+    char chr = getchar();
+    while (chr != 27) {
         fout << chr;
-        std::cin.get(chr);
+        chr = getchar();
     }
 }
 

@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <filesystem>
 #include <chrono>
+#include <curses.h>
 
 
 struct Date{
