@@ -47,8 +47,11 @@ void FileObject::createFile(std::string name) {
     std::ofstream fout(path.string() + "/" + name);
     std::cout << name << " //Use 'esc' to finish\n";
     char chr = getchar();
+    bool flag = true;
     while (chr != 27) {
-        fout << chr;
+        if (!(flag && chr == '\n'))
+            fout << chr;
+        flag = false;
         chr = getchar();
     }
 }
