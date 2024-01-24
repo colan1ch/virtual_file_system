@@ -21,7 +21,7 @@ std::ostream& operator << (std::ostream &out, Date &date) {
 
 FileObject::FileObject(std::filesystem::path _path) :
     path(_path),
-    directory_name(_path.filename()),
+    directory_name(_path.filename().string()),
     date_of_change(timeToString(std::filesystem::last_write_time(_path)))
 {}
 
@@ -31,7 +31,12 @@ void FileObject::showPath(){
 }
 
 void FileObject::openFile(std::string name){
-    std::ifstream fin(path.string() + "/" + name);
+    std::filesystem::path file_path(path.string() + "/" + name);
+    if (std::filesystem::is_directory(file_path)) {
+        std::cout << "Cannot open directory, use cd <name> instead\n";
+        return;
+    }
+    std::ifstream fin(file_path);
     if (!fin) {
         std::cout << "No such file in this directory\n";
         return;
@@ -43,28 +48,45 @@ void FileObject::openFile(std::string name){
     std::cout << std::endl;
 }
 
-void FileObject::createFile(std::string name) {
-    std::ofstream fout(path.string() + "/" + name);
-    std::cout << name << " //Use 'esc' to finish\n";
-    char chr = getchar();
-    bool flag = true;
-    while (chr != 27) {
-        if (!(flag && chr == '\n'))
-            fout << chr;
-        flag = false;
-        chr = getchar();
+void FileObject::createDirectory(std::string name) {
+    std::filesystem::path dir_path(path.string() + "/" + name);
+    if (!std::filesystem::create_directory(dir_path)) {
+        std::cout << "Dircetory with that name already exists\n";
     }
 }
 
+void FileObject::createFile(std::string name) {
+    std::ofstream fout(path.string() + "/" + name);
+    file_input
+}
+
 void FileObject::deleteFile(std::string name){
-    if (remove((path.string() + "/" + name).c_str())) {
+    if (!std::filesystem::remove_all((path.string() + "/" + name))) {
         std::cout << "No such file in this directory\n";
     }
 }
 
+int getSizeOfDirectory(std::filesystem::path path) {
+    size_t size = 0;
+    if (std::filesystem::is_directory(path)) {
+        for (std::filesystem::path file: std::filesystem::directory_iterator(path)) {
+            if (std::filesystem::is_directory(file)) {
+                size += getSizeOfDirectory(file);
+            }
+            else {
+                size += file_size(file);
+            }
+        }
+    }
+    return size;
+}
+
 void FileObject::showSize(std::string name) {
     std::filesystem::path file_path(path.string() + "/" + name);
-    if (std::filesystem::exists(file_path)) {
+    if (std::filesystem::is_directory(file_path)) {
+        std::cout << getSizeOfDirectory(file_path) << " Bytes\n";
+    }
+    else if (std::filesystem::exists(file_path)) {
         std::cout << file_size(file_path) << " Bytes\n";
     }
     else {
@@ -123,9 +145,11 @@ void help() {
     std::cout << "path - show current directory path\n";
     std::cout << "cd <name> - go to directory <name>\n";
     std::cout << "cdup - go to parent directory\n";
+    std::cout << "createdir <name> - create directory <name>\n";
     std::cout << "open <filename> - open txt file <filename>\n";
     std::cout << "create <filename> - create txt file <filename>\n";
-    std::cout << "delete <filename> - delete file <filename>\n";
+    std::cout << "delete <name> - delete file or directory <name>\n";
+    std::cout << "dirsize - show size of current directory\n";
     std::cout << "size <filename> - show size of <filename> in bytes\n";
     std::cout << "dirdate - show date of changing a current directory\n";
     std::cout << "date <filename> - show date of changing <filename>\n";
@@ -151,6 +175,10 @@ void programLaunch() {
         else if (cmd == "cdup") {
             changeDirUp(cur_file);
         }
+        else if (cmd == "createdir") {
+            std::cin >> filename;
+            cur_file.createDirectory(filename);
+        }
         else if (cmd == "open") {
             std::cin >> filename;
             cur_file.openFile(filename);
@@ -162,6 +190,9 @@ void programLaunch() {
         else if (cmd == "delete") {
             std::cin >> filename;
             cur_file.deleteFile(filename);
+        }
+        else if (cmd == "dirsize") {
+            std::cout << getSizeOfDirectory(cur_file.path) << " Bytes\n";
         }
         else if (cmd == "size") {
             std::cin >> filename;

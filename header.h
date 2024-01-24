@@ -4,7 +4,45 @@
 #include <iomanip>
 #include <filesystem>
 #include <chrono>
+#ifdef _WIN64
+#include <conio.h>
+#define file_input std::cout << name << " //Use 'esc' to finish, use ctrl+j instead of 'enter' \n"; \
+char chr = _getch(); \
+char s[4000]; \
+int ind = 0; \
+while (chr != 27) { \
+    if (chr != 8) { \
+        s[ind++] = chr; \
+        _putch(chr); \
+    } \
+    if (chr == '\n') { \
+        _putch('\r'); \
+        _putch('\n'); \
+        s[ind++] = chr; \
+    } \
+    if ((chr == 8) && (ind > 0)) { \
+        _putch(chr); \
+        _putch(' '); \
+        _putch(chr); \
+        s[ind--] = ' '; \
+    } \
+    chr = _getch(); \
+} \
+for (int i = 0; i < ind; i++) { \
+    fout << s[i]; \
+}
+#else
 #include <curses.h>
+#define file_input std::cout << name << " //Use 'esc' to finish\n"; \
+char chr = getchar(); \
+bool flag = true; \
+while (chr != 27) { \
+    if (!(flag && chr == '\n')) \
+        fout << chr; \
+    flag = false; \
+    chr = getchar(); \
+}
+#endif
 
 
 struct Date{
@@ -28,6 +66,8 @@ struct FileObject{
     FileObject(std::filesystem::path _path);
 
     void showPath();
+
+    void createDirectory(std::string name);
 
     void openFile(std::string name);
 
@@ -55,3 +95,5 @@ void help();
 void programLaunch();
 
 std::string timeToString(std::filesystem::file_time_type ftime);
+
+int getSizeOfDirectory();
