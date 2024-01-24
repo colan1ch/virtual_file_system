@@ -6,6 +6,7 @@
 #include <chrono>
 #ifdef _WIN64
 #include <conio.h>
+#define YEAR_DIFF 369
 #define file_input std::cout << name << " //Use 'esc' to finish, use ctrl+j instead of 'enter' \n"; \
 char chr = _getch(); \
 char s[4000]; \
@@ -33,6 +34,7 @@ for (int i = 0; i < ind; i++) { \
 }
 #else
 #include <curses.h>
+#define YEAR_DIFF 0
 #define file_input std::cout << name << " //Use 'esc' to finish\n"; \
 char chr = getchar(); \
 bool flag = true; \

@@ -7,7 +7,7 @@ Date::Date(const std::string _date){
     hours = stoi(_date.substr(11, 2));
     day = stoi(_date.substr(8, 2));
     month = _date.substr(4, 3);
-    year = stoi(_date.substr(20, 4));
+    year = stoi(_date.substr(20, 4)) - YEAR_DIFF;
 }
 
 std::ostream& operator << (std::ostream &out, Date &date) {
@@ -137,7 +137,7 @@ void changeDir(FileObject &cur_file, std::string name){
         cur_file = FileObject(new_path);
     }
     else {
-        std::cout << "This is not a directory\n";
+        std::cout << "No such directory\n";
     }
 }
 
