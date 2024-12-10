@@ -11,6 +11,7 @@
 char chr = _getch(); \
 char s[4000]; \
 int ind = 0; \
+
 while (chr != 27) { \
     if (chr != 8) { \
         s[ind++] = chr; \
